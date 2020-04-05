@@ -1,0 +1,473 @@
+#******************************************************
+# [Depends (depends on - fisrt is the latest to start)]
+#******************************************************
+# appdeamon
+#   -> homeassistant
+#     -> nodered
+#       -> glances
+#         -> garfana
+#           -> influxdb
+#             -> mariadb
+#               -> mosquitto
+#                 -> portainer
+#                   -> letsencrypt
+# loganalyser
+#   -> mariadb
+#
+#******************************************************
+# [Independent - No order needed]
+#******************************************************
+# phpadmin
+# logspout
+# watchtower
+# smartglass
+# dockermon
+
+version: "3.5"
+
+networks:
+  logging:
+
+services:
+
+#region : LOGSPOUT
+#==========================================================================
+  logspout:
+    container_name: 'logspout'
+    image: gliderlabs/logspout:latest
+    networks:
+      - logging
+    volumes:
+      - /etc/hostname:/etc/host_hostname:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: syslog://192.168.2.5:514
+    environment:
+      - EXCLUDE_LABEL=influxdb.exclude
+    # deploy:
+    #   mode: global
+      # resources:
+      #   limits:
+      #     cpus: '0.20'
+      #     memory: 256M
+      #   reservations:
+      #     cpus: '0.10'
+      #     memory: 128M
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+#endregion
+
+
+#region : PORTAINER
+#==========================================================================
+  portainer:
+    container_name: 'portainer'
+    image: portainer/portainer
+    depends_on:
+      - letsencrypt
+    volumes:
+      - portainer_data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+    ports:
+      - "9000:9000"
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+#endregion
+
+
+#region : WATCHTOWER
+#==========================================================================
+  watchtower:
+    container_name: 'watchtower'
+    # image: v2tec/watchtower
+    image: containrrr/watchtower
+    command: --schedule "0 0 4 * * *" --cleanup --label-enable
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /srv/watchtower/config.json:/config.json
+      #- /srv/watchtower/config.json:/config.json:ro
+    environment:
+      - WATCHTOWER_NOTIFICATIONS=email
+      - WATCHTOWER_NOTIFICATION_EMAIL_FROM=manoir.de.chene@gmail.com
+      - WATCHTOWER_NOTIFICATION_EMAIL_TO=mauro@bornet.ch
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER=smtp.gmail.com
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_USER=manoir.de.chene@gmail.com
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PASSWORD=2@mPv@QAt3vn
+#endregion
+
+
+#region : LETSENCRYPT
+#==========================================================================
+  letsencrypt:
+    container_name: 'letsencrypt'
+    image: linuxserver/letsencrypt
+    restart: always
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - /srv/letsencrypt:/config
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      # - PGID=1000 #Original
+      - PGID=1004
+      - PUID=1000
+      - EMAIL=manoir.de.chene@gmail.com
+      - URL=manoir.duckdns.org
+      - VALIDATION=duckdns
+      - SUBDOMAINS=wildcard
+      # - SUBDOMAINS=hs,ga,pr,pmy,la # Original
+      - DUCKDNSTOKEN=10220753-a909-4b5d-b5e2-51ea1476d9ce
+      - TZ=Europe/Zurich
+    ports:
+      - "443:443"
+      - "80:80"
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+#endregion
+
+
+#region : MOSQUITTO
+#==========================================================================
+  mosquitto:
+    container_name: 'mosquitto'
+    image: eclipse-mosquitto
+    restart: always
+    depends_on:
+      - portainer
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - /srv/mosquitto:/mosquitto/config
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_data:/mosquitto/log
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Zurich
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+#endregion
+
+
+# #region : MARIADB
+# #==========================================================================
+#   mariadb:
+#     container_name: 'mariadb'
+#     image: yobasystems/alpine-mariadb
+#     restart: always
+#     depends_on:
+#       - mosquitto
+#     volumes:
+#       - /srv/mysql/data:/var/lib/mysql
+#       - /srv/mysql/logs:/var/lib/mysql/mysql-bin
+#     environment:
+#       - MYSQL_ROOT_PASSWORD=h6v9MGBJXdQSHco
+#       - MYSQL_DATABASE=homeassistant
+#       - MYSQL_USER=homeassistant
+#       - MYSQL_PASSWORD=e5G9u3YpC64rniw
+#       - TZ=Europe/Zurich
+#       - DB_HOST=localhost:3306
+#       - PGID=1000
+#       - PUID=1000
+#     ports:
+#       - "3306:3306"
+#     # expose:
+#     #   - "3306"
+#     labels:
+#       - com.centurylinklabs.watchtower.enable=true
+# #endregion
+
+#region : MARIADB
+#==========================================================================
+  mariadb:
+    container_name: 'mariadb'
+    image: mariadb:latest
+    restart: on-failure
+    depends_on:
+      - mosquitto
+    volumes:
+      - /srv/mysql/data:/var/lib/mysql
+#      - /srv/mysql/logs:/var/lib/mysql/mysql-bin
+    environment:
+      - MYSQL_ROOT_PASSWORD=h6v9MGBJXdQSHco
+      - MYSQL_DATABASE=homeassistant
+      - MYSQL_USER=homeassistant
+      - MYSQL_PASSWORD=e5G9u3YpC64rniw
+      - TZ=Europe/Zurich
+      - DB_HOST=localhost:3306
+      - PGID=1000
+      - PUID=1000
+    ports:
+      - "3306:3306"
+    # expose:
+    #   - "3306"
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+#endregion
+
+#region : INFLUXDB
+#==========================================================================
+  influxdb:
+    image: influxdb:latest
+    container_name: 'influxdb'
+    healthcheck:
+      test: ["CMD", "curl", "-sI", "http://127.0.0.1:8086/ping"]
+      interval: 30s
+      timeout: 1s
+      retries: 24
+    network_mode: host
+    depends_on:
+      - mariadb
+    environment:
+      - TZ=Europe/Zurich
+    ports:
+      - "8083:8083"
+      - "8086:8086"
+    restart: on-failure
+    volumes:
+      - /srv/influxdb:/var/lib/influxdb
+    # - /svr/backups:/backups # not working
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+#endregion
+
+
+#region : GRAFANA
+#==========================================================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: 'grafana'
+    depends_on:
+      - influxdb
+    user: root
+    environment:
+      - TZ=Europe/Zurich
+    ports:
+      - "3000:3000"
+    restart: on-failure
+    volumes:
+      - /srv/grafana:/var/lib/grafana
+      - /srv/grafana/log:/var/log/grafana
+    network_mode: host
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+#endregion
+
+
+#region : SMARTGLASS-XBOX
+#==========================================================================
+  # smartglass:
+  #   container_name: 'smartglass'
+  #   image: openxbox/xbox-smartglass-rest
+  #   network_mode: host
+  #   #restart: unless-stopped
+  #   #restart: no
+  #   volumes:
+  #     - /srv/xbox-smartglass-rest-docker/.config/smartglass:/root/.local/share/xbox
+  #   labels:
+  #     - com.centurylinklabs.watchtower.enable=true
+#endregion
+
+
+#region : HOMEASSISTANT
+#==========================================================================
+  homeassistant:
+    container_name: 'homeassistant'
+    image: homeassistant/home-assistant
+    restart: unless-stopped
+    #user: '1000:1000'
+    command: '/config/docker/run'
+    depends_on:
+      - nodered
+    devices:
+      - /dev/ttyACM0:/dev/ttyACM0
+      #:rwm
+      #- device /dev/ttyUSB-ZStick-5G:/dev/ttyUSB-ZStick-5G
+    volumes:
+      - /srv/homeassistant:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /srv/letsencrypt/etc/letsencrypt:/etc/letsencrypt:ro
+      - /srv/homeassistant_dockershared:/shared
+    environment:
+      - UMASK=007
+      - TZ=Europe/Zurich
+      - PUID=1000
+      - PGID=1000
+    privileged: true
+    network_mode: host
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+#endregion
+
+
+#region : DOCKERMON
+#==========================================================================
+  docker_mon:
+    container_name: 'ha_dockermon'
+    image: philhawthorne/ha-dockermon
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /srv/ha_dockermon:/config
+    ports:
+      - "8126:8126"
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+#endregion
+
+
+#region : LOGANALYZER (apache-php7)
+#==========================================================================
+  loganalyzer:
+    container_name: 'loganalyzer'
+    image: nimmis/apache-php7
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /srv/ha_dockermon:/config
+      - /srv/www/html:/var/www/html
+    ports:
+      - "8081:80"
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+#endregion
+
+
+#region : GLANCES
+#==========================================================================
+  glances:
+    container_name: 'glances'
+    restart: always
+    image: nicolargo/glances
+    depends_on:
+      - grafana
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "61208-61209:61208-61209"
+    environment:
+      - TZ=Europe/Zurich
+      - GLANCES_OPT=-w
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+#endregion
+
+
+#region : PHPMYADMIN
+#==========================================================================
+  phpmyadmin:
+    container_name: 'phpmyadmin'
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    depends_on:
+      - mariadb
+    ports:
+      - "8080:80"
+    environment:
+      - MYSQL_USERNAME=root
+      - MYSQL_ROOT_PASSWORD=h6v9MGBJXdQSHco
+      - PMA_HOST=192.168.2.5
+      - PMA_PORT=3306
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+#endregion
+
+
+#region : NODE-RED
+#==========================================================================
+  nodered:
+    container_name: 'nodered'
+    image: nodered/node-red:latest
+    depends_on:
+      - glances
+    restart: always 
+    user: 1000:1000
+    volumes:
+      - /srv/node-red:/data
+    ports:
+      - "1880:1880"
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+#endregion
+
+
+#region : MODE-SONOS
+#==========================================================================
+  sonosapi:
+    container_name: 'sonosapi'
+    image: chrisns/docker-node-sonos-http-api
+    restart: always
+    volumes:
+      - /srv/sonosapi/cache:/app/cache
+      - /srv/sonosapi/clips:/app/static/clips
+      - /srv/sonosapi/settings:/app/settings
+      - /srv/sonosapi/presets:/app/presets
+    network_mode: host
+#endregion
+
+
+#region : TASMOADMIN
+#==========================================================================
+  tasmoadmin:
+    container_name: 'tasmoadmin'
+    image: raymondmm/tasmoadmin
+    volumes:
+      - tasmoadmin_data:/data
+    ports:
+      - "1099:80"
+#endregion
+
+
+#region : APPDAEMON
+#==========================================================================
+  appdaemon:
+    container_name: 'appdaemon'
+    image: acockburn/appdaemon:latest
+    restart: on-failure
+    depends_on:
+      - homeassistant
+    ports:
+      - "5050:5050"
+    volumes:
+      - /srv/appdaemon:/conf
+      - /srv/appdaemon:/certs
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - HA_URL=https://hs.manoir.duckdns.org
+      - TOKEN=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiI3MWIxYTA1MDJmNjg0MDFlOTcyY2U1ZDhlZjczODNiYyIsImlhdCI6MTU3NTA2NTEzMywiZXhwIjoxODkwNDI1MTMzfQ.HLwnoBA5gglOUwOK5YnbhoweyKuiNPFFUEqZolsGpas
+      - DASH_URL=http://192.168.2.5:5050
+      - EXTRA_CMD=-D DEBUG
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+#endregion
+
+
+# #region : ADMINER
+# #==========================================================================
+#   adminer:
+#     container_name: 'adminer'
+#     image: adminer:latest
+#     restart: on-failure
+#     depends_on:
+#       - mariadb
+#     ports:
+#       - "8100:8080"
+#     volumes:
+#       - /srv/adminer:/var/www/html
+#       - /etc/localtime:/etc/localtime:ro
+#     environnement:
+#     labels: com.centurylinklabs.watchtower.enable=true
+# #endregion
+
+
+#region : VOLUMES
+#==========================================================================
+volumes:
+  portainer_data:
+  mosquitto_data:
+  tasmoadmin_data:
+#endregion
