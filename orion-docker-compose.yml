@@ -11,5 +11,5 @@ services:
     volumes:
       - /volume2/Calibre/data:/config
     ports:
-      - 8080:8080
+      - 7080:8080
     restart: unless-stopped
