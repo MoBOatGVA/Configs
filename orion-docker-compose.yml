@@ -1,0 +1,15 @@
+version: "3.3"
+services:
+  calibre:
+    image: linuxserver/calibre:latest
+    container_name: calibre
+    environment:
+      - PUID=1026
+      - PGID=100
+      - TZ=Europe/Zurich
+      - CLI_ARGS="–auth-mode=basic"
+    volumes:
+      - /volume2/Calibre/data:/config
+    ports:
+      - 8080:8080
+    restart: unless-stopped
