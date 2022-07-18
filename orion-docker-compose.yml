@@ -56,8 +56,10 @@ services:
       - PUID=1029
       - PGID=65538
       - TZ=Europe/Zurich
-      - ADMINER_DEFAULT_DB_DRIVER=mysql_db
-      - ADMINER_DEFAULT_DB_HOST=mariadb
+      - ADMINER_DEFAULT_SERVER=mariadb
+      - ADMINER_DEFAULT_SYSTEM=server
+      - ADMINER_DEFAULT_USERNAME=root
+      #- ADMINER_DEFAULT_PASSWORD=
       - ADMINER_DESIGN=galkaev
     ports:
       - 6080:8080
