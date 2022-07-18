@@ -21,7 +21,7 @@ services:
       - PUID=1029
       - PGID=65538
       - TZ=Europe/Zurich
-      - MYSQL_ROOT_PASSWORD=8fTStQ9oFN2c3A2y
+      - MYSQL_ROOT_PASSWORD=bemr7902
       - MYSQL_DIR=/config
       - DATADIR=/data
     volumes:
@@ -38,9 +38,9 @@ services:
       - PUID=1029
       - PGID=65538
       - TZ=Europe/Zurich
-      - PMA_HOST=192.168.1.175
-      - PMA_PORT=3306
-      - PMA_ARBITRARY=1
+      #- PMA_HOST=192.168.1.175
+      #- PMA_PORT=3306
+      #- PMA_ARBITRARY=1
     volumes:
       - /volume2/Dockers/PhpMyAdmin/config:/config
     ports:
