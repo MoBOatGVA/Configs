@@ -38,11 +38,11 @@ services:
       - PUID=1029
       - PGID=65538
       - TZ=Europe/Zurich
-      #- PMA_HOST=192.168.1.175
-      #- PMA_PORT=3306
+      - PMA_HOST=mariadb
+      - PMA_PORT=3306
       #- PMA_ARBITRARY=1
-    volumes:
-      - /volume2/Dockers/PhpMyAdmin/config:/config
+    #volumes:
+    #  - /volume2/Dockers/PhpMyAdmin/config:/config
     ports:
       - 6180:80
     restart: unless-stopped
