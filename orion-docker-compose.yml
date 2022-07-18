@@ -32,19 +32,21 @@ services:
     restart: unless-stopped
 
   phpmyadmin:
-    image: phpmyadmin:latest
+    image: linuxserver/phpmyadmin:latest
     container_name: phpmyadmin
+    environment:
       - PUID=1029
       - PGID=65538
       - TZ=Europe/Zurich
-    ports:
-      - 6180:80
-    environment:
       - PMA_HOST=192.168.1.175
       - PMA_PORT=3306
       - PMA_ARBITRARY=1
+    volumes:
+      - /volume2/Dockers/PhpMyAdmin/config:/config
+    ports:
+      - 6180:80
     restart: unless-stopped
-
+    
   adminer:
     image: adminer:latest
     container_name: adminer
