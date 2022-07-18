@@ -20,8 +20,8 @@ services:
     environment:
       - PUID=1029
       - PGID=65538
-      - MYSQL_ROOT_PASSWORD=8fTStQ9oFN2c3A2y
       - TZ=Europe/Zurich
+      - MYSQL_ROOT_PASSWORD=8fTStQ9oFN2c3A2y
       - MYSQL_DIR=/config
       - DATADIR=/data
     volumes:
@@ -29,6 +29,22 @@ services:
       - /volume2/Dockers/MariaDB/data:/data
     ports:
       - 3306:3306
+    restart: unless-stopped
+
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    depends_on:
+      - mariadb
+    environment:
+      - PUID=1029
+      - PGID=65538
+      - TZ=Europe/Zurich
+      - ADMINER_DEFAULT_DB_DRIVER=mysql_db
+      - ADMINER_DEFAULT_DB_HOST=mariadb
+      - ADMINER_DESIGN=galkaev
+    ports:
+      - 6080:8080
     restart: unless-stopped
 
   nextcloud:
