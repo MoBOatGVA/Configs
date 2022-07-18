@@ -14,9 +14,23 @@ services:
       - 7080:8080
     restart: unless-stopped
 
+services:
+  redis:
+    image: redis:alpine
+    container_name: redis
+    command: "redis-server --loglevel warning"
+    volumes:
+      - /volume2/Dockers/Redis/config:/usr/local/etc/redis
+      - redis_data:/data/
+    ports:
+      - "6379:6379"
+    restart: "always"
+
   mariadb:
     image: linuxserver/mariadb:latest
     container_name: mariadb
+    depends_on:
+      - redis    
     environment:
       - PUID=1029
       - PGID=65538
@@ -81,3 +95,6 @@ services:
       - 4443:443
       - 4080:80
     restart: unless-stopped
+
+volumes:
+  redis_data:
