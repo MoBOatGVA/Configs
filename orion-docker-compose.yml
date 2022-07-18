@@ -13,3 +13,37 @@ services:
     ports:
       - 7080:8080
     restart: unless-stopped
+
+  mariadb:
+    image: linuxserver/mariadb:latest
+    container_name: mariadb
+    environment:
+      - PUID=1029
+      - PGID=65538
+      - MYSQL_ROOT_PASSWORD=8fTStQ9oFN2c3A2y
+      - TZ=Europe/Zurich
+      - MYSQL_DIR=/config
+      - DATADIR=/data
+    volumes:
+      - /volume2/Dockers/MariaDB/config:/config
+      - /volume2/Dockers/MariaDB/data:/data
+    ports:
+      - 3306:3306
+    restart: unless-stopped
+
+  nextcloud:
+    image: linuxserver/nextcloud:latest
+    container_name: nextcloud
+    depends_on:
+      - mariadb
+    environment:
+      - PUID=1029
+      - PGID=65538
+      - TZ=Europe/Zurich
+    volumes:
+      - /volume2/Dockers/Nextcloud/config:/config
+      - /volume2/Dockers/Nextcloud/data:/data
+    ports:
+      - 4443:443
+      - 4080:80
+    restart: unless-stopped
