@@ -38,9 +38,10 @@ services:
       - PGID=65538
       - TZ=Europe/Zurich
     ports:
-      - 7780:80
+      - 6180:80
     environment:
-      - PMA_ARBITRARY=1
+      - PMA_HOST=192.168.1.175
+      - PMA_PORT=3306
     restart: unless-stopped
 
   adminer:
