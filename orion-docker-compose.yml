@@ -27,7 +27,7 @@ services:
 
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent
-    container_name: qbittorrent
+    container_name: Qbittorrent
     environment:
       - PUID=1026
       - PGID=100
