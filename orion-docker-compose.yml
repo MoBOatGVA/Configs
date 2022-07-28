@@ -20,7 +20,8 @@ services:
     command: "redis-server --loglevel warning"
     volumes:
       - /volume2/Dockers/Redis/config:/usr/local/etc/redis
-      - redis_data:/data/
+      - /volume2/Dockers/Redis/data:/data/
+      #- redis_data:/data/
     ports:
       - "6379:6379"
     restart: "always"
