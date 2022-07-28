@@ -14,7 +14,6 @@ services:
       - 7080:8080
     restart: unless-stopped
 
-services:
   redis:
     image: redis:alpine
     container_name: redis
