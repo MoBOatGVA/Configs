@@ -23,7 +23,7 @@ services:
       - PGID=100
       - TZ=Europe/Zurich
     volumes:
-      - /volume2/Dockers/Redis/config:/usr/local/etc/redis
+      - /volume1/docker/Redis/config:/usr/local/etc/redis
       - /volume2/Dockers/Redis/data:/data/
       #- redis_data:/data/
     ports:
@@ -39,7 +39,7 @@ services:
       - TZ=Europe/Zurich
       - WEBUI_PORT=8081
     volumes:
-      - /volume1/docker/qBittorrent:/config
+      - /volume1/docker/qBittorrent/config:/config
       - /volume2/Torrents:/data/torrents
     ports:
       - "8084:8081"
