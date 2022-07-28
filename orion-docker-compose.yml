@@ -34,7 +34,7 @@ services:
       - TZ=Europe/Zurich
       - WEBUI_PORT=8081
     volumes:
-      - /volume1/docker/qbittorrent:/config
+      - /volume1/docker/Qbittorrent:/config
       - /volume2/Torrents:/data/torrents
     ports:
       - "7081:8081"
