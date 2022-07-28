@@ -18,6 +18,10 @@ services:
     image: redis:alpine
     container_name: redis
     command: "redis-server --loglevel warning"
+    environment:
+      - PUID=1026
+      - PGID=100
+      - TZ=Europe/Zurich
     volumes:
       - /volume2/Dockers/Redis/config:/usr/local/etc/redis
       - /volume2/Dockers/Redis/data:/data/
