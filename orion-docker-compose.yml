@@ -25,22 +25,19 @@ services:
       - "6379:6379"
     restart: "always"
 
-  qbittorrent:
+  qBittorrent:
     image: lscr.io/linuxserver/qbittorrent
-    container_name: Qbittorrent
+    container_name: qBittorrent
     environment:
       - PUID=1026
       - PGID=100
       - TZ=Europe/Zurich
       - WEBUI_PORT=8081
     volumes:
-      - /volume1/docker/Qbittorrent:/config
+      - /volume1/docker/qBittorrent:/config
       - /volume2/Torrents:/data/torrents
     ports:
-      - "7081:8081"
-    #network_mode: service:vpn # run on the vpn network
-    #depends_on:
-    #  - vpn
+      - "8084:8081"
     restart: unless-stopped
 
 #  mariadb:
