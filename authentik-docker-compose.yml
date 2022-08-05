@@ -29,7 +29,7 @@ services:
       - TZ=Europe/Zurich
       - REDIS_PASSWORD="MSd8eAKL9tbZNxXy"
     volumes:
-      - auth_redis_data:/bitnami/redis/data
+      - auth_redis_data:/data
 #endregion
 
 #region : POSTGRES
