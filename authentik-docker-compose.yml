@@ -1,1 +1,198 @@
+version: "3.3"
 
+networks:
+  authentik:
+    ipam:
+      config:
+        - subnet: 172.20.1.0/24
+
+services:
+
+#region : REDIS
+#       : https://docs.ibracorp.io/authelia/authelia/installation/docker-compose
+#__________________________________________________________________________
+  authentik-redis:
+    container_name: 'authentik-redis'
+    image: redis:alpine
+    restart: unless-stopped
+    networks:
+      authentik:
+        ipv4_address: 172.20.1.2
+    command: --port 6380
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 3s
+    environment:
+      - TZ=Europe/Zurich
+      - REDIS_PASSWORD="MSd8eAKL9tbZNxXy"
+    volumes:
+      - auth_redis_data:/bitnami/redis/data
+#endregion
+
+#region : POSTGRES
+#       : 
+#__________________________________________________________________________
+  authentik-postgres:
+    container_name: 'authentik-postgres'
+    image: postgres:12-alpine
+    restart: unless-stopped
+    networks:
+      authentik:
+        ipv4_address: 172.20.1.3
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d authentik -U sysadmin"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    volumes:
+      - auth_postgres_data:/var/lib/postgresql/data
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Zurich
+      - POSTGRES_PASSWORD=mSqn3Snwhc82C3ma6FG5TMHEXzDgduuc
+      - POSTGRES_USER=sysadmin
+      - POSTGRES_DB=authentik
+    depends_on:
+      - authentik-redis
+#endregion
+
+# #region : AUTHENTIK-SERVER
+# #      : 
+# #__________________________________________________________________________
+#   authentik-server:
+#     container_name: authentik-server
+#     image: ghcr.io/goauthentik/server:2022.7.2
+#     restart: unless-stopped
+#     networks:
+#       authentik:
+#         ipv4_address: 172.20.1.4
+#     command: server
+#     environment:
+#       PUID: 1000
+#       PGID: 1000
+#       TZ: Europe/Zurich
+#       AUTHENTIK_SECRET_KEY: eYiEwzmFsM4oPwPxcfuJ2zBwyCaR9MKp
+#       # PORTS
+#       AUTHENTIK_PORT_HTTP: 9100
+#       AUTHENTIK_PORT_HTTPS: 9101
+#       # REDIS
+#       AUTHENTIK_REDIS__HOST: authentik-redis
+#       AUTHENTIK_REDIS__PORT: 6380
+#       AUTHENTIK_REDIS__PASSWORD: MSd8eAKL9tbZNxXy
+#       # POSTGRES
+#       AUTHENTIK_POSTGRESQL__HOST: authentik-postgres
+#       AUTHENTIK_POSTGRESQL__USER: sysadmin
+#       AUTHENTIK_POSTGRESQL__NAME: authentik
+#       AUTHENTIK_POSTGRESQL__PASSWORD: mSqn3Snwhc82C3ma6FG5TMHEXzDgduuc
+#       # GEOPIP
+#       AUTHENTIK_AUTHENTIK__GEOIP: /geoip/GeoLite2-City.mmdb
+#       # CONFIG
+#       AUTHENTIK_LOG_LEVEL: warning
+#     volumes:
+#       - /srv/authentik/media:/media
+#       - /srv/authentik/custom-templates:/templates
+#       - auth_geoip_data:/geoip
+#     ports:
+#       # - "0.0.0.0:9997:9997"
+#       # - "0.0.0.0:9998:9998"
+#       - 9100:9100
+#       - 9101:9101
+#     depends_on:
+#       - authentik-worker
+# #endregion
+
+# #region : AUTHENTIK-WORKER
+# #       : 
+# #__________________________________________________________________________
+#   authentik-worker:
+#     container_name: authentik-worker
+#     image: ghcr.io/goauthentik/server:2022.7.2
+#     restart: unless-stopped
+#     networks:
+#       authentik:
+#         ipv4_address: 172.20.1.5
+#     command: worker
+#     environment:
+#       PUID: 1000
+#       PGID: 1000
+#       TZ: Europe/Zurich
+#       AUTHENTIK_SECRET_KEY: eYiEwzmFsM4oPwPxcfuJ2zBwyCaR9MKp
+#       #PORTS
+#       AUTHENTIK_PORT_HTTP: 9100
+#       AUTHENTIK_PORT_HTTPS: 9101
+#       # Skip if you don't want to enable error reporting
+#       AUTHENTIK_ERROR_REPORTING__ENABLED: true
+#       # REDIS
+#       AUTHENTIK_REDIS__HOST: authentik-redis
+#       AUTHENTIK_REDIS__PORT: 6380
+#       AUTHENTIK_REDIS__PASSWORD: MSd8eAKL9tbZNxXy
+#       # POSTGRES
+#       AUTHENTIK_POSTGRESQL__HOST: authentik-postgres
+#       AUTHENTIK_POSTGRESQL__USER: sysadmin
+#       AUTHENTIK_POSTGRESQL__NAME: authentik
+#       AUTHENTIK_POSTGRESQL__PASSWORD: mSqn3Snwhc82C3ma6FG5TMHEXzDgduuc
+#       # GEOPIP
+#       AUTHENTIK_AUTHENTIK__GEOIP: /geoip/GeoLite2-City.mmdb
+#       # CONFIG
+#       AUTHENTIK_LOG_LEVEL: warning
+#       # MAIL
+#       #       SMTP Host Emails are sent to
+#       AUTHENTIK_EMAIL__HOST: mail.infomaniak.ch
+#       AUTHENTIK_EMAIL__PORT: 587
+#       #       Optionally authenticate (don't add quotation marks to you password)
+#       AUTHENTIK_EMAIL__USERNAME: mauro@bornet.ch
+#       AUTHENTIK_EMAIL__PASSWORD: 8ABu3tMqLgRiR3ZsaDcbj8igc
+#       #       Use StartTLS
+#       AUTHENTIK_EMAIL__USE_TLS: true
+#       #       Use SSL
+#       AUTHENTIK_EMAIL__USE_SSL: false
+#       AUTHENTIK_EMAIL__TIMEOUT: 10
+#       #       Email address authentik will send from, should have a correct @domain
+#       AUTHENTIK_EMAIL__FROM: authentik@bornet.ch
+#       user: root
+#     volumes:
+#       - /srv/authentik/media:/media
+#       - /srv/authentik/certs:/certs
+#       - /var/run/docker.sock:/var/run/docker.sock
+#       - /srv/authentik/custom-templates:/templates
+#       - auth_geoip_data:/geoip
+#     depends_on:
+#       - authentik-postgres
+# #endregion
+
+#region : GEOIP
+#       : 
+#__________________________________________________________________________
+  authentik-geoip:
+    container_name: authentik-geoip
+    image: maxmindinc/geoipupdate:latest
+    networks:
+      authentik:
+        ipv4_address: 172.20.1.6
+    volumes:
+      - auth_geoip_data:/usr/share/GeoIP
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Europe/Zurich
+      GEOIPUPDATE_ACCOUNT_ID: 247871
+      GEOIPUPDATE_LICENSE_KEY: 4zEycSBz1ajUuu4W
+      GEOIPUPDATE_EDITION_IDS: "GeoLite2-City"
+      GEOIPUPDATE_FREQUENCY: "8"
+#endregion
+
+#region : VOLUMES
+#__________________________________________________________________________
+volumes:
+  auth_postgres_data:
+    name: auth_postgres_data
+  auth_redis_data:
+    name: auth_redis_data
+  auth_geoip_data:
+    name: auth_geoip_data
+#endregion
