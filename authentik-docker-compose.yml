@@ -18,7 +18,7 @@ services:
     networks:
       authentik:
         ipv4_address: 172.20.1.2
-    command: --port 6380
+    command: 'sysctl vm.overcommit_memory=1'
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
       start_period: 20s
@@ -82,7 +82,6 @@ services:
 #       AUTHENTIK_PORT_HTTPS: 9101
 #       # REDIS
 #       AUTHENTIK_REDIS__HOST: authentik-redis
-#       AUTHENTIK_REDIS__PORT: 6380
 #       AUTHENTIK_REDIS__PASSWORD: MSd8eAKL9tbZNxXy
 #       # POSTGRES
 #       AUTHENTIK_POSTGRESQL__HOST: authentik-postgres
@@ -129,7 +128,6 @@ services:
 #       AUTHENTIK_ERROR_REPORTING__ENABLED: true
 #       # REDIS
 #       AUTHENTIK_REDIS__HOST: authentik-redis
-#       AUTHENTIK_REDIS__PORT: 6380
 #       AUTHENTIK_REDIS__PASSWORD: MSd8eAKL9tbZNxXy
 #       # POSTGRES
 #       AUTHENTIK_POSTGRESQL__HOST: authentik-postgres
