@@ -127,7 +127,7 @@ services:
       # Skip if you don't want to enable error reporting
       AUTHENTIK_ERROR_REPORTING__ENABLED: true
       # REDIS
-      AUTHENTIK_REDIS__HOST: authentik-redis
+      AUTHENTIK_REDIS__HOST: 172.20.1.5
       AUTHENTIK_REDIS__PASSWORD: MSd8eAKL9tbZNxXy
       # POSTGRES
       AUTHENTIK_POSTGRESQL__HOST: authentik-postgres
