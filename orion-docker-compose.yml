@@ -8,8 +8,11 @@ services:
       - PGID=100
       - TZ=Europe/Zurich
       - CLI_ARGS="–auth-mode=basic"
+      - CUSTOM_PORT=8080
     volumes:
       - /volume2/Calibre/data:/config
+      - /volume2/Torrents/_watch/ePub:/media
+      - /volume2/Torrents/eBooks:/media
     ports:
       - 7080:8080
     restart: unless-stopped
