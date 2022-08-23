@@ -11,8 +11,8 @@ services:
       - CUSTOM_PORT=8080
     volumes:
       - /volume2/Calibre/data:/config
-      - /volume2/Torrents/_watch/ePub:/media
-      - /volume2/Torrents/eBooks:/media
+      - /volume2/Torrents/_watch/ePub:/media/ePubs
+      - /volume2/Torrents/eBooks:/media/Torrents
     ports:
       - 7080:8080
     restart: unless-stopped
