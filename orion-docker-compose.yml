@@ -17,6 +17,26 @@ services:
       - 7080:8080
     restart: unless-stopped
 
+  doublecommander:
+    image: linuxserver/doublecommander:latest
+    container_name: doublecommander
+    environment:
+      - PUID=1026
+      - PGID=100
+      - TZ=Europe/Zurich
+      - TITLE="DoubleCommander"
+    volumes:
+      - /volume1/docker/DoubleCommander/config:/config
+      #- /volume1/docker/DoubleCommander/data:/data
+      - /volume2/Calibre:/data/Calibre
+      - /volume2/Cinema:/data/Cinema
+      - /volume2/Cinema2:/data/Cinema2
+      - /volume2/Cinema3:/data/Cinema3
+      - /volume2/Torrents:/data/Torrents
+    ports:
+      - 43000:3000
+    restart: unless-stopped  
+
   redis:
     image: redis:alpine
     container_name: redis
