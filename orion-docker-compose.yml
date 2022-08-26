@@ -77,9 +77,9 @@ services:
     volumes:
       - /volume2/Dockers/TMM/config:/data
       - /volume2/Dockers/TMM/addons:/app/addons
-      - /volume2/Cinema:/media/Cinema
-      - /volume2/Cinema2:/media/Cinema2
-      - /volume2/Cinema3:/media/Cinema3
+      - /volume2/Cinema:/media/cinema
+      - /volume2/Cinema2:/media/cinema2
+      - /volume2/Cinema3:/media/cinema3
     ports:
       - 44000:4000
     restart: unless-stopped 
