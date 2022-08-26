@@ -50,8 +50,8 @@ services:
       - DISPLAY_WIDTH=2560
       - DISPLAY_HEIGHT=1440
     volumes:
-      - /volume2/Docker/TMM/config:/config
-      - /volume2/Docker/TMM/addons:/app/addons
+      - /volume2/Dockers/TMM/config:/config
+      - /volume2/Dockers/TMM/addons:/app/addons
       - /volume2/Cinema:/media/Cinema
       - /volume2/Cinema2:/media/Cinema2
       - /volume2/Cinema3:/media/Cinema3
