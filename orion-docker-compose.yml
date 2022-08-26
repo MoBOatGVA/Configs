@@ -64,16 +64,10 @@ services:
     image: tinymediamanager/tinymediamanager:latest
     container_name: tmm
     environment:
-      - PUID=1026
-      - PGID=100
       - USER_ID=1026
       - GROUP_ID=100
       - TZ=Europe/Zurich
       - LANG=en_US.UTF-8
-      - APP_NAME=TMM
-      - DISPLAY=:0
-      - DISPLAY_WIDTH=2560
-      - DISPLAY_HEIGHT=1440
     volumes:
       - /volume2/Dockers/TMM/config:/data
       - /volume2/Dockers/TMM/addons:/app/addons
