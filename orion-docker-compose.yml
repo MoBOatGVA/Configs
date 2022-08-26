@@ -77,6 +77,7 @@ services:
     volumes:
       - /volume2/Dockers/TMM/config:/data
       - /volume2/Dockers/TMM/addons:/app/addons
+      - /volume2/Dockers/TMM/launcher-extra.yml:/app/launcher-extra.yml
       - /volume2/Cinema:/media/cinema
       - /volume2/Cinema2:/media/cinema2
       - /volume2/Cinema3:/media/cinema3
