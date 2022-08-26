@@ -57,7 +57,6 @@ services:
       - /volume2/Cinema3:/media/Cinema3
     ports:
       - 44000:4000
-      - 45800:5800
     restart: unless-stopped 
     
   redis:
