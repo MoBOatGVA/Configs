@@ -32,6 +32,7 @@ services:
       - /volume2/Cinema:/data/Cinema
       - /volume2/Cinema2:/data/Cinema2
       - /volume2/Cinema3:/data/Cinema3
+      - /volume2/Downloads:/data/Downloads
       - /volume2/Torrents:/data/Torrents
     ports:
       - 43000:3000
