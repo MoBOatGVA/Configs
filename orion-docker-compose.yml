@@ -104,8 +104,8 @@ services:
       - PUID=1026
       - PGID=100
       - TZ=Europe/Zurich      
-    expose:
-      - 27017
+    ports:
+      - 27017:27017
     volumes:
       - /volume2/Dockers/MeshCentral/db:/data/db
       
